@@ -13,76 +13,42 @@ myPose(:,1) = param.init_pose;
 origin = param.origin; 
 resolution = param.resol;
 
-[size_y, size_x] = size(map);
-
 num_particles = 500;
 particles = repmat(param.init_pose, [1, num_particles]);
+
+prev_weights = ones(1, num_particles);
 
 for j = 2:num_motions
         
     %% motion with random walk
     
-    current_step = j
-    
     delta = random_motion(num_particles);
     new_particles = particles + delta;
     
-    angles = scanAngles + new_particles(3, :);
-    occ_x = cos(angles) .* ranges(:, j) + new_particles(1, :);
-    occ_y = -sin(angles) .* ranges(:, j) + new_particles(2, :);
-    coord_x = ceil(occ_x * resolution) + origin(1);
-    coord_y = ceil(occ_y * resolution) + origin(2);
-
-    coord_x = clip_coord(coord_x, size_x);
-    coord_y = clip_coord(coord_y, size_y);
+    %widx = transform_particles(pose(:, j), scanAngles, ...
+    %    ranges(:, j), resolution, origin, size(map));
     
-    indices = sub2ind(size(map), coord_y, coord_x);
-    range_map = map(indices);
-        
-    hits = sum(range_map >= 0.5) * 10;
-    misses = sum(range_map < -0.2) * 5;
+    %ideal_weight = map_correlation(map, widx);
     
-    weights = hits - misses;
+    idx = transform_particles(new_particles, ...
+        scanAngles, ranges(:, j), resolution, origin, size(map));
     
-    % normalize sample weights
-    weights(weights < 0) = 0;
-    weights = weights / sum(weights);
-        
-    %% max weight particle is considered as current pose
+    weights = map_correlation(map, idx);
     
-    [~, pose_idx] = max(weights);
-        
-    new_particles(:, pose_idx)
+    % average with prev weight
+    weights = weights .* prev_weights;
+    
+    [max_weight, pose_idx] = max(weights);
+    
+    %sprintf('current_step=%f max_weight=%f, ideal_weight=%f', ...
+    %    j, max_weight, ideal_weight)
     
     myPose(:, j) = new_particles(:, pose_idx);
     
-    if abs(sum(weights) - 1) > 1e-7
-        return
-    end
-            
-    assert(abs(sum(weights) - 1) < 1e-7);
+    %particles = resample_particles(weights, new_particles);
     
-    %% resample new particles by weights
-    samples = mnrnd(num_particles, weights);
-    new_p = zeros(size(new_particles));
-        
-    counter = 0;
+    particles = repmat(new_particles(:, pose_idx), [1, num_particles]);
     
-    for i=1:num_particles
-        
-       num_samples = samples(i);
-       
-       if num_samples == 0
-           continue
-       end
-       
-       new_p(:, (counter + 1): (counter + num_samples)) ...
-           = repmat(new_particles(:, i), [1 num_samples]);
-       counter = counter + num_samples;
-    end
-    
-    particles = new_p;
-   
 end
 
 end

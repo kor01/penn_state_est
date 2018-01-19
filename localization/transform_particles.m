@@ -2,7 +2,7 @@ function [idx] = transform_particles(...
     particles, angles, ranges, resolution, origin, map_size)
 % transform particles in local coordinate to world coordinate
 
-angles = angles - particles(3, :);
+angles = angles + particles(3, :);
 occ_x = cos(angles) .* ranges + particles(1, :);
 occ_y = -sin(angles) .* ranges + particles(2, :);
 coord_x = ceil(occ_x * resolution) + origin(1);

@@ -1,6 +1,6 @@
 function motion = random_motion(num_particles)
 
-motion_variance = [0.05 0.05 0.1];
+motion_variance = [0.03 0.03 0.03];
 
 x_motion = normrnd(0, motion_variance(1), [1, num_particles]);
 y_motion = normrnd(0, motion_variance(2), [1, num_particles]);

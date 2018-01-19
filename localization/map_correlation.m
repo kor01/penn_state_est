@@ -3,7 +3,7 @@ function [weights] = map_correlation(map, idx)
 
 range_map = map(idx);
 hits = sum(range_map >= 0.5) * 10;
-misses = sum(range_map < -0.2) * 5;
+misses = sum(range_map < -0.2) * 10;
 
 weights = hits - misses;
 

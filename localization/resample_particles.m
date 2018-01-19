@@ -1,6 +1,5 @@
 function [new_particles] = resample_particles(weights, particles)
 % resample paticles by correlation weight
-
 weights(weights < 0) = 0;
 weights = weights / sum(weights);
 samples = mnrnd(length(weights), weights);
