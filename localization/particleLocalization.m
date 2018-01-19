@@ -24,7 +24,7 @@ for j = 2:num_motions
     
     current_step = j
     
-    delta = random_motion(num_particles);    
+    delta = random_motion(num_particles);
     new_particles = particles + delta;
     
     angles = scanAngles + new_particles(3, :);
@@ -39,11 +39,10 @@ for j = 2:num_motions
     indices = sub2ind(size(map), coord_y, coord_x);
     range_map = map(indices);
         
-    hits = sum(range_map >= 0.5);
-    misses = sum(range_map < -0.2);
+    hits = sum(range_map >= 0.5) * 10;
+    misses = sum(range_map < -0.2) * 5;
     
     weights = hits - misses;
-    
     
     % normalize sample weights
     weights(weights < 0) = 0;
@@ -84,7 +83,6 @@ for j = 2:num_motions
     
     particles = new_p;
    
-       
 end
 
 end
